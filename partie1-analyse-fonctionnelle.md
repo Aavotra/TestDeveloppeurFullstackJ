@@ -7,7 +7,7 @@ La première étape consiste à préparer l’image : vérifier le format, la re
 
 Ensuite, analyser l'image pour identifier les couleurs présentes. Les zones de même couleur sont repérées, leur surface calculée, puis additionnée pour obtenir la surface totale par couleur.
 
- À partir des surfaces calculées, on estime la quantité de fil nécessaire pour chaque couleur en se basant sur une échelle de référence. Le temps de broderie est ensuite déterminé à partir des surfaces estimées et de la vitesse moyenne de la machine, exprimée par exemple en surface  ou en nombre de points brodés par minute. 
+À partir des surfaces calculées, on estime la quantité de fil nécessaire pour chaque couleur en se basant sur une échelle de référence. Le temps de broderie est ensuite déterminé à partir des surfaces estimées et de la vitesse moyenne de la machine, exprimée par exemple en surface  ou en nombre de points brodés par minute. 
 
 Enfin, le coût de la broderie est estimé en se basant sur un coût de référence par minute et/ou par longueur de fil utilisée selon la préférence du client, et les résultats sont présentés à l’utilisateur sous forme de tableau récapitulatif indiquant la surface, le fil nécessaire par couleur ainsi que la couleur, le temps et le coût. Ces informations peuvent être affichées dans l’interface et/ou exportées sous forme de rapport.
 
@@ -37,6 +37,97 @@ Enfin, le coût de la broderie est estimé en se basant sur un coût de référe
 - Définir un coût de référence (par minute de broderie ou par longueur de fil utilisée)
 - Calculer le coût pour chaque couleur en fonction de la quantité de fil et du temps de broderie
 - Additionner les différents coûts pour obtenir le coût total estimé
+
+## 2. Modèle de données
+
+### 1. Commande (Image de broderie)
+
+Représente une commande ou un projet basé sur une image fournie par le client.
+
+**Champs :**  
+- `id` : integer  
+- `nom_commande` : string  
+- `image_path` : string  
+- `largeur` : float  
+- `hauteur` : float  
+- `surface_totale` : float  
+- `temps_total_estime` : float  
+- `cout_total_estime` : float  
+- `date_creation` : datetime  
+
+**Relations :**  
+- Une commande possède plusieurs `CouleurDetectee`.
+
+**Règles métier :**  
+- L’image doit être dans un format valide (PNG, JPG, etc.).  
+- Largeur et hauteur doivent être supérieures à 0.  
+
+---
+
+### 2. CouleurDetectee
+
+Représente une couleur détectée dans l’image.
+
+**Champs :**  
+- `id` : integer  
+- `commande_id` : integer (FK)  
+- `code_couleur` : string  
+- `nom_couleur` : string  
+- `surface_totale` : float  
+- `longueur_fil_estimee` : float  
+- `temps_broderie` : float  
+- `cout_estime` : float  
+
+**Relations :**  
+- Une couleur contient plusieurs `ZoneCouleur`.
+
+**Règles métier :**  
+- `code_couleur` doit être un code hex valide.  
+- `surface_totale` doit être supérieure à 0.  
+
+---
+
+### 3. ZoneCouleur
+
+Représente une zone ou contour d’une couleur spécifique dans l’image.
+
+**Champs :**  
+- `id` : integer  
+- `couleur_id` : integer (FK)  
+- `surface` : float  
+- `position_x` : float  
+- `position_y` : float  
+- `largeur` : float  
+- `hauteur` : float  
+
+**Relations :**  
+- Une couleur détectée contient plusieurs zones.
+
+**Règles métier :**  
+- La surface doit être supérieure à 0.  
+- La zone doit être contenue dans les dimensions de l’image.  
+
+---
+
+### 4. Configuration
+
+Contient les paramètres utilisés pour les calculs.
+
+**Champs :**  
+- `id` : integer  
+- `commande_id` : integer (FK)  
+- `type_fil` : string  
+- `coefficient_surface_fil` : float  
+- `vitesse_machine` : float  
+- `cout_par_minute` : float  
+- `cout_par_metre_fil` : float  
+
+**Relations :**  
+- Une commande a une configuration.
+
+**Règles métier :**  
+- Vitesse machine > 0  
+- Coûts ≥ 0  
 
 
 ## 3. Obstacles potentiels et risques
