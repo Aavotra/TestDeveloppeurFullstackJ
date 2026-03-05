@@ -13,8 +13,7 @@ class Task
         $this->name = $name;
         $this->project = $project;
         $this->priority = $priority;
-        $this->isBlocked = $isBlocked;
-        $this->blockReason = $blockReason;
+        $this->applyBlockValidation($isBlocked, $blockReason);
     }
 
     public function getName(): string
@@ -57,14 +56,19 @@ class Task
         $this->priority = $priority;
     }
 
-    public function setBlock(bool $isBlocked): void
-    {
-        $this->isBlocked = $isBlocked;
+    public function setBlocked(bool $isBlocked, ?string $blockReason = null): void 
+    { 
+        $this->applyBlockValidation($isBlocked, $blockReason); 
     }
 
-    public function setBlockReason(?string $blockReason = null): void
-    {
-        $this->blockReason = $blockReason;
+    private function applyBlockValidation(bool $isBlocked, ?string $blockReason): void 
+    { 
+        if ($isBlocked && (is_null($blockReason) || trim($blockReason) === '')) 
+        { 
+            throw new InvalidArgumentException("Une tâche bloquée doit avoir une raison de  blockage!"); 
+        } 
+        $this->isBlocked = $isBlocked; 
+        $this->blockReason = $blockReason; 
     }
  
 }
