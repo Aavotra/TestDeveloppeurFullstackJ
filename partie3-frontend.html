@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Liste des tâches</title>
+</head>
+<body>
+  <h1>Tableau des tâches</h1>
+  <label for="projectFilter">Projet </label>
+  <select id="projectFilter">
+    <option value="">Tous les projets </option>
+  </select>
+  <table border="1" id="tasksTable">
+    <thead>
+      <tr>
+        <th>Nom de la tâche</th>
+        <th>Projet</th>
+        <th>Priorité</th>
+        <th>Raison du blocage</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const tasks = [
+      {
+        "name": "Configurer le serveur",
+        "project": "Implémentation Client A",
+        "priority": 1,
+        "block_reason": "En attente des accès"
+      },
+      {
+        "name": "Rédiger la documentation",
+        "project": "Projet interne",
+        "priority": 3,
+        "block_reason": "Manque d'informations"
+      },
+      {
+        "name": "Mettre à jour le schéma de données",
+        "project": "Implémentation Client B",
+        "priority": 2,
+        "block_reason": "Décision métier en attente"
+      },
+      {
+        "name": "Implémenter les nouvelles fonctionnalités",
+        "project": "Implémentation Client B",
+        "priority": 3,
+        "block_reason": "Décision métier en attente"
+      }
+    ];
+
+    function fillTable(data) 
+    {
+      const tableBody = document.querySelector("#tasksTable tbody");
+      tableBody.innerHTML = "";
+
+      if (!Array.isArray(data) || data.length === 0) {
+        const row = document.createElement("tr");
+        const column = document.createElement("td");
+        column.colSpan = 4;
+        column.textContent = "Aucune tâche disponible";
+        row.appendChild(column);
+        tableBody.appendChild(row);
+        return;
+      }
+
+      data.forEach(task => {
+        const name = (task && typeof task.name === "string" && task.name.trim() !== "")
+          ? task.name.trim()
+          : "Nom manquant";
+
+        const project = (task && typeof task.project === "string" && task.project.trim() !== "")
+          ? task.project.trim()
+          : "Projet manquant";
+
+        const priority = (task && typeof task.priority === "number" && Number.isInteger(task.priority))
+          ? task.priority
+          : "N/A";
+
+        const block_reason = (task && typeof task.block_reason === "string" && task.block_reason.trim() !== "")
+          ? task.block_reason.trim()
+          : "Aucune raison mentionnée";
+
+        const row = document.createElement("tr");
+
+        [name, project, priority, block_reason].forEach(val => {
+          const column = document.createElement("td");
+          column.textContent = val;
+          row.appendChild(column);
+        });
+
+        tableBody.appendChild(row);
+      });
+    }
+    
+    function projectFilter(data) 
+    {
+      const select = document.getElementById("projectFilter");
+      const projects = [...new Set(data.map(task => task.project))];
+      projects.forEach(project => {
+        const option = document.createElement("option");
+        option.value = project;
+        option.textContent = project;
+        select.appendChild(option);
+      });
+    }
+
+    document.getElementById("projectFilter").addEventListener("change", function() {
+      const selectedProject = this.value;
+      if (selectedProject === "") {
+        fillTable(tasks);
+      } else {
+        const filterResult = tasks.filter(task => task.project === selectedProject);
+        fillTable(filterResult);
+      }
+    });
+
+    fillTable(tasks);
+    projectFilter(tasks);
+
+  </script>
+</body>
+</html>
