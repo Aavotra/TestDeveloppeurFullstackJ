@@ -6,6 +6,10 @@
 </head>
 <body>
   <h1>Tableau des tâches</h1>
+  <label for="projectFilter">Projet </label>
+  <select id="projectFilter">
+    <option value="">Tous les projets </option>
+  </select>
   <table border="1" id="tasksTable">
     <thead>
       <tr>
@@ -36,6 +40,12 @@
         "name": "Mettre à jour le schéma de données",
         "project": "Implémentation Client B",
         "priority": 2,
+        "block_reason": "Décision métier en attente"
+      },
+      {
+        "name": "Implémenter les nouvelles fonctionnalités",
+        "project": "Implémentation Client B",
+        "priority": 3,
         "block_reason": "Décision métier en attente"
       }
     ];
@@ -84,7 +94,31 @@
       });
     }
     
+    function projectFilter(data) 
+    {
+      const select = document.getElementById("projectFilter");
+      const projects = [...new Set(data.map(task => task.project))];
+      projects.forEach(project => {
+        const option = document.createElement("option");
+        option.value = project;
+        option.textContent = project;
+        select.appendChild(option);
+      });
+    }
+
+    document.getElementById("projectFilter").addEventListener("change", function() {
+      const selectedProject = this.value;
+      if (selectedProject === "") {
+        fillTable(tasks);
+      } else {
+        const filterResult = tasks.filter(task => task.project === selectedProject);
+        fillTable(filterResult);
+      }
+    });
+
     fillTable(tasks);
+    projectFilter(tasks);
+
   </script>
 </body>
 </html>
